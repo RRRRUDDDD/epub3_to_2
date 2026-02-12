@@ -1,0 +1,46 @@
+# === Python 核心过滤 ===
+# 过滤编译后的字节码文件
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 过滤分发/打包产物
+dist/
+build/
+*.egg-info/
+*.egg
+
+# 过滤本地虚拟环境
+venv/
+env/
+.env/
+
+# === EPUB 转换项目专用过滤 ===
+# 极其重要：防止受版权保护的电子书文件被误上传至公开仓库
+*.epub
+*.mobi
+*.azw3
+*.pdf
+
+# 过滤解压过程可能产生的临时文件夹
+temp_epub_extract/
+/extracted/
+
+# 过滤输出目录（如果您在代码中指定了固定输出路径）
+/output/
+/converted/
+
+# === IDE 与 系统文件 ===
+# 过滤编辑器配置文件
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 过滤操作系统生成的索引文件
+.DS_Store
+Thumbs.db
+
+# === 日志与调试 ===
+# 过滤程序运行产生的日志
+*.log
