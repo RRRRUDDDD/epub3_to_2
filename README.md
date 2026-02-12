@@ -1,2 +1,58 @@
-# epub3_to_2
-The only lossless EPUB 3 ➜ 2 batch converter supporting full-depth recursive navigation reconstruction. Preserves original CSS layouts; specifically designed for high-precision academic and legal document management.
+
+---
+
+# EPUB 3 至 EPUB 2 批量无损转换工具
+
+本工具是一款基于 Python 开发的专业级脚本，旨在将符合 **EPUB 3.0** 标准的电子书批量转换为 **EPUB 2.0** 兼容格式。
+
+在当前电子书处理方案中，通用型工具如calibre、pandoc等通常通过重写 HTML/CSS 进行格式重组，这往往会导致原始排版样式表（CSS）的丢失或非预期变更。
+
+本脚本采用**元数据级重构（Metadata Reconstruction）**方案，是目前市面上极少数能实现以下特性的工具：
+
+* **结构无损转换**：仅修改版本描述文件及导航索引，不触动书籍核心 HTML 源代码与样式表，确保原始视觉排版 100% 还原。
+* **唯一性递归算法**：针对 EPUB 3 `nav` 节点提供全深度递归解析，可将复杂的嵌套目录完整转化为符合 DAISY 规范的 `toc.ncx` 索引。
+* **原子级封装约束**：严格执行 EPUB 标准中的文件头排序规则，确保 `mimetype` 文件作为容器首个字节块且不经过压缩处理，确保通过官方校验。
+
+---
+
+## 典型使用场景
+
+本工具针对以下高频需求场景进行了深度优化：
+
+* **老旧阅读设备适配**：解决早期 Kindle、汉王等仅支持 EPUB 2 标准的硬件设备无法读取 EPUB 3 目录或文件报错的问题。
+* **跨平台排版迁移**：在不同排版引擎之间迁移书籍时，保持原始 CSS 布局不受二次重写的干扰，适用于对排版精细度要求极高的出版级文档。
+* **自动化馆藏整理**：支持对成规模的数字图书馆镜像进行自动化批量降级处理，提升数字资源的普适兼容性。
+
+---
+
+## 技术实现规格
+
+本工具的转换逻辑遵循以下技术规范：
+
+1. **OPF 规范降级**：通过解析 `content.opf`，将 `version` 属性从 `3.0` 更新为 `2.0`。
+2. **属性清理**：自动检索并移除 EPUB 3 特有的属性定义（如 `properties="nav"`），确保向后兼容性。
+3. **NCX 自动生成**：利用 `lxml` 库对 XHTML 导航文档进行深度优先遍历（DFS），重构为 EPUB 2 必须的 `ncx` 导航图。
+4. **线程安全处理**：采用多线程（Threading）技术处理 GUI 事件循环，避免在大规模批量处理时出现界面阻塞。
+
+---
+
+## 软件架构
+
+### 环境依赖
+
+* **Python 版本**：3.8 或更高版本
+* **依赖库**：`lxml` (用于高性能 XML/XHTML 解析)
+
+### 安装方法
+
+```bash
+pip install lxml
+
+```
+
+### 使用指南
+
+1. **源路径配置**：指定包含待转换 EPUB 3 文件的根目录。
+2. **目标路径配置**：指定转换后文件的导出位置。
+
+---
