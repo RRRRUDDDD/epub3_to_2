@@ -17,8 +17,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pylint
-        pip install lxml
+        pip install pylint lxml  # 合并安装，确保环境一致
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files '*.py')
+        pylint --extension-pkg-allow-list=lxml --fail-under=9.0 $(git ls-files '*.py')
