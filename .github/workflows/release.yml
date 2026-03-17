@@ -3,28 +3,42 @@ name: Build and Release
 on:
   push:
     tags:
-      - 'v*'  
-  workflow_dispatch:  
+      - 'v*'  # 侦测到 v 开头的 tag 时触发
+  workflow_dispatch:
 
 permissions:
-  contents: write 
+  contents: write
 
 jobs:
   build:
     name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false # 即使某个平台失败，也让其他平台继续构建
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
+        include:
+          - os: windows-latest
+            asset_name: epub3_to_2-windows-amd64.exe
+            use_upx: true
+          - os: ubuntu-latest
+            asset_name: epub3_to_2-linux-amd64
+            use_upx: true
+          - os: macos-latest  # 默认是 ARM64 (Apple Silicon)
+            asset_name: epub3_to_2-macos-arm64.dmg
+            use_upx: false
+          - os: macos-13      # Intel 芯片的 Mac
+            asset_name: epub3_to_2-macos-x86_64.dmg
+            use_upx: false
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11' 
+          python-version: '3.11'
+          cache: 'pip'
 
       - name: Install System Dependencies (Linux)
         if: runner.os == 'Linux'
@@ -32,35 +46,55 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y python3-tk tk-dev libxml2-dev libxslt-dev
 
+      - name: Setup UPX (for Windows and Linux)
+        if: matrix.use_upx == true
+        uses: crazy-max/ghaction-upx@v3
+        with:
+          install-only: true
+
       - name: Install Python Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install pyinstaller customtkinter lxml tkinterdnd2
 
       - name: Build with PyInstaller
+        # 加入 --clean 保持环境干净，根据系统决定是否使用 --upx-dir
         run: |
-          pyinstaller --noconfirm --onefile --windowed --name epub3_to_2 \
+          pyinstaller --clean --noconfirm --onefile --windowed --name epub3_to_2 \
             --collect-all customtkinter \
             --collect-all tkinterdnd2 \
             epub3_to_2.py
 
-      - name: Rename and Package Assets
+      - name: Package and Generate Checksum
         shell: bash
         run: |
           cd dist
+          
+          # 1. 针对不同系统重命名或打包为 dmg
           if [ "$RUNNER_OS" == "Windows" ]; then
-            mv epub3_to_2.exe epub3_to_2-windows-amd64.exe
+            mv epub3_to_2.exe ${{ matrix.asset_name }}
           elif [ "$RUNNER_OS" == "macOS" ]; then
-            zip -r epub3_to_2-macos.zip epub3_to_2.app
+            # 使用原生工具将 .app 打包为精美的 .dmg 磁盘镜像
+            hdiutil create -volname "EPUB3_to_2_Converter" -srcfolder epub3_to_2.app -ov -format UDZO ${{ matrix.asset_name }}
           else
-            mv epub3_to_2 epub3_to_2-linux-amd64
+            mv epub3_to_2 ${{ matrix.asset_name }}
+          fi
+          
+          # 2. 生成 SHA256 校验和
+          if command -v sha256sum &> /dev/null; then
+            sha256sum ${{ matrix.asset_name }} > ${{ matrix.asset_name }}.sha256
+          else
+            shasum -a 256 ${{ matrix.asset_name }} > ${{ matrix.asset_name }}.sha256
           fi
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts-${{ matrix.os }}
-          path: dist/epub3_to_2-*
+          path: |
+            dist/${{ matrix.asset_name }}
+            dist/${{ matrix.asset_name }}.sha256
+          if-no-files-found: error # 如果没有找到产物直接报错，方便排查
 
   release:
     name: Create GitHub Release
