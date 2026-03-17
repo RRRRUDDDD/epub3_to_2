@@ -1,6 +1,6 @@
 # EPUB 3 to EPUB 2 Converter
 
-将 **EPUB 3** 电子书批量降级为 **EPUB 2** 兼容格式，仅修改元数据与导航结构，**不触动原始排版**。
+将 **EPUB 3** 电子书批量无损降级为 **EPUB 2** 兼容格式，**不触动原始排版**。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
