@@ -2,7 +2,6 @@
 
 将 **EPUB 3** 电子书批量降级为 **EPUB 2** 兼容格式，仅修改元数据与导航结构，**不触动原始排版**。
 
-[![Pylint](https://github.com/RUD/epub3_to_2/actions/workflows/pylint.yml/badge.svg)](https://github.com/RUD/epub3_to_2/actions/workflows/pylint.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ---
@@ -76,9 +75,3 @@ python epub3_to_2.py
 - XPath 结果空值检查，友好错误提示
 - mimetype 条目清除 extra 字段，严格 `ZIP_STORED`
 - 修改后的 OPF 保留原始 ZipInfo 元数据（时间戳、压缩方式）
-
----
-
-## 许可证
-
-[MIT](LICENSE)
