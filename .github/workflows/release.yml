@@ -3,7 +3,7 @@ name: Build and Release
 on:
   push:
     tags:
-      - 'v*'  # 侦测到 v 开头的 tag 时触发
+      - 'v*'
   workflow_dispatch:
 
 permissions:
@@ -14,7 +14,7 @@ jobs:
     name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false # 即使某个平台失败，也让其他平台继续构建
+      fail-fast: false
       matrix:
         include:
           - os: windows-latest
@@ -23,11 +23,8 @@ jobs:
           - os: ubuntu-latest
             asset_name: epub3_to_2-linux-amd64
             use_upx: true
-          - os: macos-latest  # 默认是 ARM64 (Apple Silicon)
+          - os: macos-latest  
             asset_name: epub3_to_2-macos-arm64.dmg
-            use_upx: false
-          - os: macos-13      # Intel 芯片的 Mac
-            asset_name: epub3_to_2-macos-x86_64.dmg
             use_upx: false
 
     steps:
@@ -38,7 +35,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
+          
       - name: Install System Dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
@@ -56,7 +53,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyinstaller customtkinter lxml tkinterdnd2
 
-- name: Build with PyInstaller
+      - name: Build with PyInstaller
         shell: bash  
         run: |
           pyinstaller --clean --noconfirm --onefile --windowed --name epub3_to_2 \
@@ -69,17 +66,14 @@ jobs:
         run: |
           cd dist
           
-          # 1. 针对不同系统重命名或打包为 dmg
           if [ "$RUNNER_OS" == "Windows" ]; then
             mv epub3_to_2.exe ${{ matrix.asset_name }}
           elif [ "$RUNNER_OS" == "macOS" ]; then
-            # 使用原生工具将 .app 打包为精美的 .dmg 磁盘镜像
             hdiutil create -volname "EPUB3_to_2_Converter" -srcfolder epub3_to_2.app -ov -format UDZO ${{ matrix.asset_name }}
           else
             mv epub3_to_2 ${{ matrix.asset_name }}
           fi
           
-          # 2. 生成 SHA256 校验和
           if command -v sha256sum &> /dev/null; then
             sha256sum ${{ matrix.asset_name }} > ${{ matrix.asset_name }}.sha256
           else
@@ -93,7 +87,7 @@ jobs:
           path: |
             dist/${{ matrix.asset_name }}
             dist/${{ matrix.asset_name }}.sha256
-          if-no-files-found: error # 如果没有找到产物直接报错，方便排查
+          if-no-files-found: error
 
   release:
     name: Create GitHub Release
