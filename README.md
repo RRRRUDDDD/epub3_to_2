@@ -2,8 +2,6 @@
 
 将 **EPUB 3** 电子书批量无损降级为 **EPUB 2** 兼容格式，**不触动原始排版**。
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-
 ---
 
 ## 为什么需要它？
