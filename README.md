@@ -34,7 +34,7 @@ Calibre、Pandoc 等工具在格式转换时会重新解析并生成 HTML/CSS，
 
 ### 下载可执行文件
 
-前往 [Releases](https://github.com/RUD/epub3_to_2/releases/latest) 下载 `epub3_to_2.exe`，双击运行即可。
+前往 [Releases](https://github.com/RRRRUDDDD/epub3_to_2/releases) 下载 `epub3_to_2.exe`，双击运行即可。
 
 ### 从源码运行
 
